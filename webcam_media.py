@@ -150,6 +150,7 @@ def record_video(x):
                 else:
                     print("❌ Error reading frame from camera")
                 break
+            frame = cv2.flip(frame, 1)
             # ذخیره فریم
             out.write(frame)
             
@@ -239,18 +240,16 @@ def record_video(x):
                     print("❌ The recording time is very short")
                 return
             
-            video_clip = video_clip.subclip(0, final_duration)
-            audio_clip = audio_clip.subclip(0, final_duration)
+            video_clip = video_clip.subclipped(0, final_duration)
+            audio_clip = audio_clip.subclipped(0, final_duration)
             
-            final_clip = video_clip.set_audio(audio_clip)
-            
+            final_clip = video_clip.with_audio(audio_clip)            
             # ذخیره فایل نهایی
             final_clip.write_videofile(
                 final_output, 
                 codec='libx264', 
                 audio_codec='aac', 
                 fps=VIDEO_FPS,
-                verbose=False,
                 logger=None
             )
             

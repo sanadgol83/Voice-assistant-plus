@@ -205,7 +205,7 @@ mony_command = ['اقتصاد', 'دلار', 'طلا']
 internet_command = ['آنلاین','سرعت','اتصال','اینترنت']
 
 # واژگان دستوری انگلیسی
-app_commands_en = ['app', 'application', 'program', 'open']
+app_commands_en = ['app', 'application', 'open']
 chrome_command_en = ['chrome', 'browser', 'google']
 firefox_command_en = ['firefox', 'fox']
 word_command_en = ['word', 'document']
@@ -218,7 +218,7 @@ system_commands_en = ['computer', 'system']
 off_command_en = ['shutdown', 'turn off', 'power off']
 rest_command_en = ['restart', 'reboot']
 
-webcam_commands_en = ['webcam', 'camera']
+webcam_commands_en = ['webcam', 'web cam', 'camera']
 photo_command_en = ['photo', 'picture', 'take photo']
 video_command_en = ['video', 'record video', 'record']
 
@@ -864,8 +864,9 @@ class AssistantGUI:
 
 👨‍💻 اطلاعات توسعه:
 • برنامه‌نویس و سازنده: محمد سندگل
-• ورژن فعلی نرم‌افزار: 3.2.5
+• ورژن فعلی نرم‌افزار: 3.2.7
 • سال شروع ساخت: 2025
+• آخرین تغییرات: 2026/09/20
 • تکنولوژی‌های استفاده شده: Python, Vosk, Tkinter, ttkbootstrap
 
 🎯 روش استفاده از دستیار:
@@ -955,8 +956,9 @@ class AssistantGUI:
 
 👨‍💻 Development Information:
 • Developer: Mohammad Sandgol
-• Current Version: 3.2.5
+• Current Version: 3.2.7
 • Start Year: 2025
+• Latest changes: 2026/09/20
 • Technologies Used: Python, Vosk, Tkinter, ttkbootstrap
 
 🎯 How to Use the Assistant:

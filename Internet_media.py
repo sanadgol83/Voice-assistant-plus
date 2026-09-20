@@ -15,6 +15,12 @@ import asyncio
 from dotenv import load_dotenv
 
 
+load_dotenv()
+
+LLM7_API_KEY = os.getenv("LLM7_API_KEY")
+
+POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
+
 def internet(command,x,y):
     if x == 1 :
         replacements = {'nola':'','enola':'','alex':'','article':'','of':'','بارسا':'','پارسا': '','رویا': '','ریکی':'', 'پدیا': '', 'ویکی': '', 'ویکی‌پدیا': ''}
@@ -25,7 +31,7 @@ def internet(command,x,y):
     elif x == 4 :
         replacements = {'nola':'','enola':'','alex':'','generate':'', 'image':'', 'create':'', 'photo':'', 'picture':'','بارسا':'','پارسا': '','رویا': '', 'عکس': '', 'تولید': '', "تولید‌عکس": ""}
     elif x == 5 :
-        replacements = {'nola':'','enola':'','alex':'','بارسا':'','پارسا': '','رویا': '', 'انگلیسی': '', "ترجمه": "", "ترنسلیت": ""}
+        replacements = {'nola':'','enola':'','alex':'','translate':'','بارسا':'','پارسا': '','رویا': '', 'انگلیسی': '', "ترجمه": "", "ترنسلیت": ""}
 
     for old, new in replacements.items():
         command = command.replace(old, new)
@@ -37,8 +43,8 @@ def internet(command,x,y):
         artificial(command,y)
     elif x == 4:
         c_photo(command,y)
-    #elif x == 5:
-    #    translator(command,y)
+    elif x == 5:
+        translator(command,y)
 
 wikipedia.set_lang("fa")
 
@@ -76,101 +82,135 @@ def search_browser(query,y):
         print(f"...i search about {query} in browser...")    
         speak(f"i search about {query} in browser")
 
-def artificial(query,y):
-    load_dotenv()
-    api_key = os.getenv("API_KEY", "")
-    model = os.getenv("MODEL", "google/gemma-3-27b-it")
+def artificial(query, y):
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {LLM7_API_KEY}",
         "Content-Type": "application/json"
     }
+
     messages = [
-        {"role": "system", "content":""" شما یک هوش مصنوعی کار آمد هستی هر کلمه ای که بهت دادم در رابطه باهاش تحقیق کن و خلاصه تحقیقت رو بدون توضیح اضافه 
-         بهم بده به همون زبونی که موضوع رو بهت دادم بهم خروجی بد مثلا اگه موض.ع انگلیسی جوابش انگیسی کن."""}
+        {
+            "role": "system",
+            "content": """شما یک هوش مصنوعی کارآمد هستی هر کلمه ای که بهت دادم در رابطه باهاش تحقیق کن و خلاصه تحقیقت رو بدون توضیح اضافه
+            بهم بده به همون زبونی که موضوع رو بهت دادم بهم خروجی بد مثلا اگه موضوع انگلیسی بود جوابش انگلیسی کن و اگه فارسی بود فارسی جوابش رو بده."""
+        }
     ]
+
     user_input = query
     messages.append({"role": "user", "content": user_input})
+
     payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 500
-        }
-    
+        "model": "default",
+        "messages": messages,
+        "temperature": 0.7,
+        "max_tokens": 500
+    }
+
     try:
-        # ارسال درخواست به OpenRouter API
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            "https://api.llm7.io/v1/chat/completions",
             headers=headers,
             json=payload
         )
-            
-        # بررسی وضعیت پاسخ
+
         if response.status_code == 200:
             data = response.json()
-            ai_reply = data['choices'][0]['message']['content']
-            if y==1:
-                print(": هوش مصنوعی",f"{ai_reply}\n")
+            ai_reply = data["choices"][0]["message"]["content"]
+
+            if y == 1:
+                print(": هوش مصنوعی", f"{ai_reply}\n")
                 asyncio.run(stream_audio(ai_reply))
             else:
-                print(": artificial ",f"{ai_reply}\n")
+                print(": artificial ", f"{ai_reply}\n")
                 speak(ai_reply)
-            # افزودن پاسخ به تاریخچه
-            messages.append({"role": "assistant", "content": ai_reply})
+
+            messages.append({
+                "role": "assistant",
+                "content": ai_reply
+            })
+
         else:
             print(f"\nخطا: {response.status_code} - {response.text}\n")
-        
+
     except Exception as e:
         print(f"\nخطا در ارتباط با سرور: {str(e)}\n")
 
 def c_photo(
     query,
-    model="turbo",
+    y,
+    model="lykon/dreamshaper-8-lcm",
     width=1024,
     height=1024,
-    seed=random.randint(1, 500),
+    seed=None,
     enhance=True,
     logo=False
 ):
     encoded_prompt = urllib.parse.quote(query)
-    api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?" \
-          f"model={model}&width={width}&height={height}&seed={seed}&enhance={enhance}&logo={logo}"
+
+    api_url = f"https://gen.pollinations.ai/image/{encoded_prompt}"
+
+    headers = {
+        "Authorization": f"Bearer {POLLINATIONS_API_KEY}"
+    }
+
+    if seed is None:
+        seed = random.randint(1, 500)
+
+    params = {
+        "model": model,
+        "width": width,
+        "height": height,
+        "seed": seed,
+        "enhance": enhance,
+        "logo": logo
+    }
+
     try:
-        # ارسال درخواست GET
-        response = requests.get(api_url, stream=True)
-        response.raise_for_status()  # بررسی خطاهای HTTP
-        
-        # تبدیل پاسخ به تصویر
+        response = requests.get(
+            api_url,
+            headers=headers,
+            params=params,
+            stream=True
+        )
+
+        response.raise_for_status()
+
         image = Image.open(BytesIO(response.content))
-        
+
         home_dir = os.path.expanduser("~")
-        pictures_dir = os.path.join(home_dir, "Pictures", "p_ai_photo")
-    
-    # ایجاد پوشه در صورت عدم وجود
+        pictures_dir = os.path.join(
+            home_dir,
+            "Pictures",
+            "p_ai_photo"
+        )
+
         os.makedirs(pictures_dir, exist_ok=True)
-    
-    # ایجاد نام فایل با زمان
+
         filename = f"screen_{time.strftime('%Y%m%d_%H%M%S')}.png"
         full_path = os.path.join(pictures_dir, filename)
 
-        # نمایش تصویر
         image.show(title="Generated Image")
-        
-        # ذخیره تصویر (اختیاری)
         image.save(full_path)
+
+        # خروجی متنی و صوتی
+        if y == 1:
+            result = f"عکس {query} با استفاده از هوش مصنوعی ساخته شد."
+            print(": هوش مصنوعی", f"{result}\n")
+            asyncio.run(stream_audio(result))
+
+        else:
+            result = f"I generated a photo of {query} with artificial intelligence."
+            print(": artificial", f"{result}\n")
+            speak(result)
+
         print(f"{full_path} : عکس ذخیره شد")
-        
-        translator = Translator()
-        text_fa = query
-        translation = translator.translate(text_fa, src='fa', dest='en')
-        speak(f"I generated a photo of a {translation.text} with artificial intelligence")
 
     except Exception as e:
         print(f"❌ خطا در تولید تصویر: {e}")
 
-def translator(query,x):
-    if x==1:
+def translator(query,y):
+    if y==1:
         translator = Translator()
         translation = translator.translate(query, src='fa', dest='en')
         print(translation.text)

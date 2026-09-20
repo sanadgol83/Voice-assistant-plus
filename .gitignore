@@ -168,9 +168,9 @@ Icon
 .nfs*
 
 # Project Specific
-# Vosk Models (uncomment if you don't want to upload models)
-# vosk-model-small-fa-0.5/
-# vosk-model-small-en-us-0.15/
+vosk-model-small-fa-0.5/
+vosk-model-small-en-us-0.15/
+vosk-model-en-us-0.22-lgraph/
 
 # Config files (if contains sensitive data)
 # config.json
