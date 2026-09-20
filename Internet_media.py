@@ -14,6 +14,7 @@ import speedtest
 import asyncio
 from dotenv import load_dotenv
 
+wikipedia.set_user_agent("Parsino/3.2.7 (Voice Assistant)")
 
 load_dotenv()
 
